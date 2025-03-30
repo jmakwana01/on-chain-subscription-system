@@ -2,26 +2,28 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/core/SubscriptionManager.sol";
+import "../src/billing/MeteredBilling.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract DeploySubscriptionManager is Script {
+contract DeployMeteredBilling is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address subscriptionManagerAddress = vm.envAddress("SUBSCRIPTION_MANAGER_ADDRESS");
         address paymentTokenAddress = vm.envAddress("PAYMENT_TOKEN_ADDRESS");
         address treasuryAddress = vm.envAddress("TREASURY_ADDRESS");
-        uint256 gracePeriod = 7 days; // 7 days grace period
+        uint256 billingCycleDuration = 30 days; // 30 days billing cycle
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy SubscriptionManager
-        SubscriptionManager subscriptionManager = new SubscriptionManager(
+        // Deploy MeteredBilling
+        MeteredBilling meteredBilling = new MeteredBilling(
+            subscriptionManagerAddress,
             IERC20(paymentTokenAddress),
             treasuryAddress,
-            gracePeriod
+            billingCycleDuration
         );
 
-        console.log("SubscriptionManager deployed at: ", address(subscriptionManager));
+        console.log("MeteredBilling deployed at: ", address(meteredBilling));
 
         vm.stopBroadcast();
     }
